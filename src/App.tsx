@@ -21,7 +21,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import Papa from "papaparse";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { useImmer } from "use-immer";
 import "./App.css";
 
@@ -41,8 +41,9 @@ interface PrintItem extends SquareItem {
 
 export default function App() {
   const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
 
-  const [squareItems, setSquareItems] = useImmer<SquareItem[]>(() => {
+  const [squareItems, setSquareItems] = useState<SquareItem[]>(() => {
     const storedItemString = window.localStorage.getItem("squareItems");
     if (!storedItemString) return [];
     return JSON.parse(storedItemString);
@@ -68,6 +69,24 @@ export default function App() {
     },
     [setPrintItems]
   );
+
+  const removePrintItem = useCallback(
+    (token: string) => {
+      setPrintItems((draft) => {
+        const index = draft.findIndex((di) => di.Token === token);
+        if (index === -1) throw new Error("Failed to find draft item");
+        draft.splice(index, 1);
+      });
+    },
+    [setPrintItems]
+  );
+
+  // when an add button is focused and escape is pressed,
+  // focus the search bar and clear it
+  const handleAddButtonEscape = useCallback(() => {
+    setSearch("");
+    searchRef.current?.focus();
+  }, [setSearch]);
 
   const lowercaseSearch = search.toLocaleLowerCase();
 
@@ -107,6 +126,7 @@ export default function App() {
             </FileButton>
 
             <Input
+              ref={searchRef}
               leftSection={<IconSearch />}
               placeholder="Search by Item Name or SKU"
               value={search}
@@ -142,6 +162,7 @@ export default function App() {
                       }
                     });
                   }}
+                  onAddButtonEscape={handleAddButtonEscape}
                   search={lowercaseSearch}
                 />
               ))}
@@ -151,7 +172,11 @@ export default function App() {
 
         <Stack flex={1}>
           <Group justify="end">
-            <Button leftSection={<IconClearAll size={16} />} variant="light">
+            <Button
+              leftSection={<IconClearAll size={16} />}
+              variant="light"
+              onClick={() => setPrintItems([])}
+            >
               Clear Print Queue
             </Button>
 
@@ -170,7 +195,12 @@ export default function App() {
 
             <Table.Tbody>
               {printItems.map((item) => (
-                <PrintItemRow key={item.Token} item={item} />
+                <PrintItemRow
+                  key={item.Token}
+                  item={item}
+                  updateItem={updatePrintItem}
+                  removeItem={removePrintItem}
+                />
               ))}
             </Table.Tbody>
           </Table>
@@ -184,10 +214,12 @@ function SquareItemRow({
   item,
   addItem,
   search,
+  onAddButtonEscape,
 }: {
   item: SquareItem;
   addItem: () => void;
   search: string;
+  onAddButtonEscape: () => void;
 }) {
   const matchesSearch =
     searchMatch(search, item["Item Name"]) || searchMatch(search, item.SKU);
@@ -198,8 +230,14 @@ function SquareItemRow({
       <Table.Td>{item["SKU"]}</Table.Td>
       <Table.Td>{item["Price"]}</Table.Td>
       <Table.Td>
-        <ActionIcon variant="transparent">
-          <IconPlus size={16} onClick={addItem} />
+        <ActionIcon
+          variant="transparent"
+          onClick={addItem}
+          onKeyDown={(k) => {
+            if (k.code === "Escape") onAddButtonEscape();
+          }}
+        >
+          <IconPlus size={16} />
         </ActionIcon>
       </Table.Td>
     </Table.Tr>
@@ -209,6 +247,7 @@ function SquareItemRow({
 const PrintItemRow = memo(function ({
   item,
   updateItem,
+  removeItem,
 }: {
   item: PrintItem;
   updateItem: <T extends keyof PrintItem>(
@@ -216,6 +255,7 @@ const PrintItemRow = memo(function ({
     property: T,
     value: PrintItem[T]
   ) => void;
+  removeItem: (token: string) => void;
 }) {
   return (
     <Table.Tr>
@@ -254,7 +294,10 @@ const PrintItemRow = memo(function ({
         />
       </Table.Td>
       <Table.Td>
-        <ActionIcon variant="transparent">
+        <ActionIcon
+          variant="transparent"
+          onClick={() => removeItem(item.Token)}
+        >
           <IconTrash size={16} />
         </ActionIcon>
       </Table.Td>
