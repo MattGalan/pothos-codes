@@ -8,6 +8,7 @@ import {
   NumberInput,
   Stack,
   Table,
+  TextInput,
   createTheme,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
@@ -19,11 +20,13 @@ import {
   IconSearch,
   IconTableImport,
   IconTrash,
+  IconX,
 } from "@tabler/icons-react";
 import Papa from "papaparse";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useImmer } from "use-immer";
 import "./App.css";
+import { PageCount } from "./PageCount";
 
 const theme = createTheme({});
 
@@ -94,6 +97,10 @@ export default function App() {
     searchRef.current?.focus();
   }, [setSearch]);
 
+  const pageCount = useMemo(() => {
+    return printItems.reduce((prev, cur) => prev + cur.count, 0);
+  }, [printItems]);
+
   const lowercaseSearch = search.toLocaleLowerCase();
 
   return (
@@ -131,12 +138,24 @@ export default function App() {
               )}
             </FileButton>
 
-            <Input
+            <TextInput
               ref={searchRef}
-              leftSection={<IconSearch />}
+              leftSection={<IconSearch size={16} />}
+              rightSection={
+                search && (
+                  <IconX
+                    size={16}
+                    cursor="pointer"
+                    onClick={() => setSearch("")}
+                  />
+                )
+              }
               placeholder="Search by Item Name or SKU"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(key) => {
+                if (key.code === "Escape") setSearch("");
+              }}
               w={256}
             />
           </Group>
@@ -178,6 +197,7 @@ export default function App() {
 
         <Stack flex={1}>
           <Group justify="end">
+            <PageCount count={pageCount} />
             <Button
               leftSection={<IconClearAll size={16} />}
               variant="light"
