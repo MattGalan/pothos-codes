@@ -21,7 +21,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import Papa from "papaparse";
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useImmer } from "use-immer";
 import "./App.css";
 
@@ -80,6 +80,12 @@ export default function App() {
     },
     [setPrintItems]
   );
+
+  // save print items to local storage
+  useEffect(() => {
+    if (printItems.length)
+      window.localStorage.setItem("printItems", JSON.stringify(printItems));
+  }, [printItems]);
 
   // when an add button is focused and escape is pressed,
   // focus the search bar and clear it
