@@ -1,10 +1,9 @@
 import { Group, Text } from "@mantine/core";
 import { IconAmpersand, IconArrowRight } from "@tabler/icons-react";
-
-const LABELS_PER_PAGE = 30;
+import { LABELS_PER_PAGE } from "./PDF";
 
 export function PageCount({ count }: { count: number }) {
-  const pageCount = Math.floor(count / LABELS_PER_PAGE) + 1;
+  const pageCount = Math.ceil(count / LABELS_PER_PAGE);
 
   const wastedLabels =
     count % LABELS_PER_PAGE === 0

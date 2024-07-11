@@ -27,6 +27,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useImmer } from "use-immer";
 import "./App.css";
 import { PageCount } from "./PageCount";
+import { createPDF } from "./PDF";
 
 const theme = createTheme({});
 
@@ -38,8 +39,8 @@ interface SquareItem {
   Price: string;
 }
 
-interface PrintItem extends SquareItem {
-  count: number;
+export interface PrintItem extends SquareItem {
+  count: number | "";
 }
 
 export default function App() {
@@ -206,7 +207,12 @@ export default function App() {
               Clear Print Queue
             </Button>
 
-            <Button leftSection={<IconPrinter size={16} />}>Print</Button>
+            <Button
+              leftSection={<IconPrinter size={16} />}
+              onClick={() => createPDF(printItems)}
+            >
+              Print
+            </Button>
           </Group>
 
           <Table>
@@ -283,6 +289,7 @@ const PrintItemRow = memo(function ({
   ) => void;
   removeItem: (token: string) => void;
 }) {
+  console.log(!item.count);
   return (
     <Table.Tr>
       <Table.Td>
@@ -315,11 +322,11 @@ const PrintItemRow = memo(function ({
       </Table.Td>
       <Table.Td>
         <NumberInput
-          value={item["count"] ?? 0}
+          value={item["count"]}
           error={!item["count"]}
           min={0}
           onChange={(e) => {
-            updateItem(item.Token, "count", Number(e));
+            updateItem(item.Token, "count", e === "" ? "" : Number(e));
           }}
         />
       </Table.Td>
