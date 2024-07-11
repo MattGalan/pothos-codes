@@ -3,13 +3,13 @@ import {
   Button,
   FileButton,
   Group,
-  Input,
   MantineProvider,
   NumberInput,
   Stack,
   Table,
   TextInput,
   createTheme,
+  isNumberLike,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
 import {
@@ -286,24 +286,27 @@ const PrintItemRow = memo(function ({
   return (
     <Table.Tr>
       <Table.Td>
-        <Input
+        <TextInput
           value={item["Item Name"]}
+          error={!item["Item Name"]}
           onChange={(e) => {
             updateItem(item.Token, "Item Name", e.target.value);
           }}
         />
       </Table.Td>
       <Table.Td>
-        <Input
+        <TextInput
           value={item["SKU"]}
+          error={!item["SKU"]}
           onChange={(e) => {
             updateItem(item.Token, "SKU", e.target.value);
           }}
         />
       </Table.Td>
       <Table.Td>
-        <Input
+        <TextInput
           value={item["Price"]}
+          error={!item["Price"] || validatePrice(item["Price"])}
           leftSection={<IconCurrencyDollar size={16} />}
           onChange={(e) => {
             updateItem(item.Token, "Price", e.target.value);
@@ -313,6 +316,7 @@ const PrintItemRow = memo(function ({
       <Table.Td>
         <NumberInput
           value={item["count"] ?? 0}
+          error={!item["count"]}
           min={0}
           onChange={(e) => {
             updateItem(item.Token, "count", Number(e));
@@ -335,4 +339,17 @@ function searchMatch(search: string, value: string) {
   if (!search) return true;
   if (!value) return false;
   return value.toLocaleLowerCase().includes(search);
+}
+
+function validatePrice(price: string) {
+  // not a number
+  if (!isNumberLike(price)) return "Not a number?";
+
+  // whole numbers are good
+  if (/^\d+$/.test(price)) return undefined;
+
+  // check for a decimal and two cents
+  if (!/^\d+\.\d\d$/.test(price)) return "Bad number format?";
+
+  return undefined;
 }
