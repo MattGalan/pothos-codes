@@ -48,28 +48,51 @@ export async function createLabel(
   printItem: PrintItem,
   index: number
 ) {
+  const maxWidth = LABEL_WIDTH - 2 * LABEL_PADDING;
+
+  // not in the mood to get emojis working
+  const strippedItemName = asciiOnly(printItem["Item Name"]);
+
+  // used later for vertical centering one-liners
+  const isMultiLine =
+    doc.splitTextToSize(strippedItemName, maxWidth).length > 1;
+
   const xIndex = index % LABEL_COLUMNS;
   const yIndex = Math.floor(index / LABEL_COLUMNS);
 
-  const x = PAGE_PADDING_LEFT + xIndex * (LABEL_WIDTH + LABEL_HORIZONTAL_GAP);
-  const y = PAGE_PADDING_TOP + yIndex * LABEL_HEIGHT;
+  const x =
+    PAGE_PADDING_LEFT +
+    LABEL_PADDING +
+    xIndex * (LABEL_WIDTH + LABEL_HORIZONTAL_GAP);
 
-  doc.setDrawColor(200);
-  doc.setLineWidth(0.01);
-  doc.rect(x, y, LABEL_WIDTH, LABEL_HEIGHT, "S");
+  const y =
+    PAGE_PADDING_TOP +
+    LABEL_PADDING +
+    yIndex * LABEL_HEIGHT +
+    (isMultiLine ? 0 : 0.1);
 
   const logoHeight = LOGO_HEIGHT * LOGO_SCALE;
 
+  // debug rectangle
+  doc.setDrawColor(200);
+  doc.setLineWidth(0.01);
+  doc.rect(
+    PAGE_PADDING_LEFT + xIndex * (LABEL_WIDTH + LABEL_HORIZONTAL_GAP),
+    PAGE_PADDING_TOP + yIndex * LABEL_HEIGHT,
+    LABEL_WIDTH,
+    LABEL_HEIGHT,
+    "S"
+  );
+
+  // add logo
   doc.addImage(
     "pothos-logo.png",
     "PNG",
-    x + LABEL_PADDING,
-    y + LABEL_PADDING,
+    x,
+    y,
     LOGO_WIDTH * LOGO_SCALE,
     logoHeight
   );
-
-  const maxWidth = LABEL_WIDTH - 2 * LABEL_PADDING;
 
   // render barcode
   JsBarcode("#barcode", printItem["SKU"], { displayValue: false });
@@ -80,27 +103,19 @@ export async function createLabel(
   const barcodeRatio = barcode.width / barcode.height;
   const barcodeHeight = logoHeight + 0.02;
   const barcodeWidth = barcodeHeight * barcodeRatio;
+  const barcodeX = x + LABEL_WIDTH - 2 * LABEL_PADDING - barcodeWidth;
 
   // add barcode
-  doc.addImage(
-    barcode.src,
-    x + LABEL_WIDTH - LABEL_PADDING - barcodeWidth,
-    y + LABEL_PADDING,
-    barcodeWidth,
-    barcodeHeight
-  );
+  doc.addImage(barcode.src, barcodeX, y, barcodeWidth, barcodeHeight);
 
-  doc.text(
-    "$" + printItem["Price"],
-    x + LABEL_WIDTH - LABEL_PADDING - barcodeWidth - LABEL_PADDING,
-    y + LOGO_HEIGHT * LOGO_SCALE + 0.09,
-    { align: "right" }
-  );
+  doc.text("$" + printItem["Price"], barcodeX - LABEL_PADDING, y + 0.21, {
+    align: "right",
+  });
 
   doc.text(
     asciiOnly(printItem["Item Name"]),
-    x + LABEL_PADDING,
-    y + LABEL_PADDING + LOGO_HEIGHT * LOGO_SCALE + LABEL_PADDING + 0.15,
+    x,
+    y + LOGO_HEIGHT * LOGO_SCALE + 0.28,
     { maxWidth }
   );
 }
