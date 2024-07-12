@@ -289,7 +289,6 @@ const PrintItemRow = memo(function ({
   ) => void;
   removeItem: (token: string) => void;
 }) {
-  console.log(!item.count);
   return (
     <Table.Tr>
       <Table.Td>
