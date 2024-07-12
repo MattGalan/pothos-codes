@@ -1,37 +1,33 @@
 import {
-  ActionIcon,
   Button,
   FileButton,
   Group,
   MantineProvider,
-  NumberInput,
   Stack,
   Table,
   TextInput,
   createTheme,
-  isNumberLike,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
 import {
   IconClearAll,
-  IconCurrencyDollar,
-  IconPlus,
   IconPrinter,
   IconSearch,
   IconTableImport,
-  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import Papa from "papaparse";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useImmer } from "use-immer";
 import "./App.css";
 import { PageCount } from "./PageCount";
 import { createPDF } from "./PDF";
+import { PrintItemRow } from "./PrintItemRow";
+import { SquareItemRow } from "./SquareItemRow";
 
 const theme = createTheme({});
 
-interface SquareItem {
+export interface SquareItem {
   // Unlike SKU, Token is guaranteed to be unique and is not visible to the user
   Token: string;
   "Item Name": string;
@@ -99,7 +95,7 @@ export default function App() {
   }, [setSearch]);
 
   const pageCount = useMemo(() => {
-    return printItems.reduce((prev, cur) => prev + cur.count, 0);
+    return printItems.reduce((prev, cur) => prev + Number(cur.count), 0);
   }, [printItems]);
 
   const lowercaseSearch = search.toLocaleLowerCase();
@@ -182,7 +178,7 @@ export default function App() {
                       );
 
                       if (draftItem) {
-                        draftItem.count += 1;
+                        draftItem.count = Number(draftItem.count) + 1;
                       } else {
                         draft.push({ ...item, count: 1 });
                       }
@@ -240,122 +236,4 @@ export default function App() {
       </Group>
     </MantineProvider>
   );
-}
-
-function SquareItemRow({
-  item,
-  addItem,
-  search,
-  onAddButtonEscape,
-}: {
-  item: SquareItem;
-  addItem: () => void;
-  search: string;
-  onAddButtonEscape: () => void;
-}) {
-  const matchesSearch =
-    searchMatch(search, item["Item Name"]) || searchMatch(search, item.SKU);
-
-  return (
-    <Table.Tr display={matchesSearch ? "table-row" : "none"}>
-      <Table.Td>{item["Item Name"]}</Table.Td>
-      <Table.Td>{item["SKU"]}</Table.Td>
-      <Table.Td>{item["Price"]}</Table.Td>
-      <Table.Td>
-        <ActionIcon
-          variant="transparent"
-          onClick={addItem}
-          onKeyDown={(k) => {
-            if (k.code === "Escape") onAddButtonEscape();
-          }}
-        >
-          <IconPlus size={16} />
-        </ActionIcon>
-      </Table.Td>
-    </Table.Tr>
-  );
-}
-
-const PrintItemRow = memo(function ({
-  item,
-  updateItem,
-  removeItem,
-}: {
-  item: PrintItem;
-  updateItem: <T extends keyof PrintItem>(
-    token: string,
-    property: T,
-    value: PrintItem[T]
-  ) => void;
-  removeItem: (token: string) => void;
-}) {
-  return (
-    <Table.Tr>
-      <Table.Td>
-        <TextInput
-          value={item["Item Name"]}
-          error={!item["Item Name"]}
-          onChange={(e) => {
-            updateItem(item.Token, "Item Name", e.target.value);
-          }}
-        />
-      </Table.Td>
-      <Table.Td>
-        <TextInput
-          value={item["SKU"]}
-          error={!item["SKU"]}
-          onChange={(e) => {
-            updateItem(item.Token, "SKU", e.target.value);
-          }}
-        />
-      </Table.Td>
-      <Table.Td>
-        <TextInput
-          value={item["Price"]}
-          error={!item["Price"] || validatePrice(item["Price"])}
-          leftSection={<IconCurrencyDollar size={16} />}
-          onChange={(e) => {
-            updateItem(item.Token, "Price", e.target.value);
-          }}
-        />
-      </Table.Td>
-      <Table.Td>
-        <NumberInput
-          value={item["count"]}
-          error={!item["count"]}
-          min={0}
-          onChange={(e) => {
-            updateItem(item.Token, "count", e === "" ? "" : Number(e));
-          }}
-        />
-      </Table.Td>
-      <Table.Td>
-        <ActionIcon
-          variant="transparent"
-          onClick={() => removeItem(item.Token)}
-        >
-          <IconTrash size={16} />
-        </ActionIcon>
-      </Table.Td>
-    </Table.Tr>
-  );
-});
-
-function searchMatch(search: string, value: string) {
-  if (!search) return true;
-  if (!value) return false;
-  return value.toLocaleLowerCase().includes(search);
-}
-
-function validatePrice(price: string) {
-  // not a number
-  if (!isNumberLike(price)) return "Not a number?";
-
-  // whole numbers are good
-  if (/^\d+$/.test(price)) return undefined;
-
-  // check for a decimal and two cents
-  if (!/^\d+\.\d\d$/.test(price)) return "Bad number format?";
-
-  return undefined;
 }
