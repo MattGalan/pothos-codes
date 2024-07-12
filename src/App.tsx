@@ -2,11 +2,14 @@ import {
   Button,
   FileButton,
   Group,
+  Image,
   MantineProvider,
   Stack,
   Table,
   TextInput,
+  Text,
   createTheme,
+  ScrollArea,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { useHotkeys } from "@mantine/hooks";
@@ -26,7 +29,37 @@ import { createPDF } from "./PDF";
 import { PrintItemRow } from "./PrintItemRow";
 import { SquareItemRow } from "./SquareItemRow";
 
-const theme = createTheme({});
+const theme = createTheme({
+  primaryColor: "green",
+  white: "#fffffb",
+  black: "#1c2310",
+  colors: {
+    green: [
+      "#f6f8ed",
+      "#eaefd8",
+      "#d7e1b5",
+      "#bbcd89",
+      "#a1b863",
+      "#839d45",
+      "#667c34",
+      "#4f602b",
+      "#46542a",
+      "#384324",
+    ],
+    gray: [
+      "#f6f8ed",
+      "#eaefd8",
+      "#d7e1b5",
+      "#bbcd89",
+      "#a1b863",
+      "#839d45",
+      "#667c34",
+      "#4f602b",
+      "#46542a",
+      "#384324",
+    ],
+  },
+});
 
 export interface SquareItem {
   // Unlike SKU, Token is guaranteed to be unique and is not visible to the user
@@ -105,9 +138,21 @@ export default function App() {
 
   return (
     <MantineProvider theme={theme}>
+      <Text c="dimmed" size="sm" pos="absolute" bottom={8} right={8}>
+        {"made with <3 by Matt Galan"}
+      </Text>
+
       <Group wrap="nowrap" align="start" p="lg">
         <Stack flex={1}>
-          <Group>
+          <Group justify="end">
+            <Image
+              src="./pothos-logo.png"
+              height="30"
+              width="auto"
+              mr="auto"
+              ml="7"
+            />
+
             <FileButton
               onChange={(file) => {
                 if (!file) return;
@@ -133,7 +178,7 @@ export default function App() {
             >
               {(props) => (
                 <Button leftSection={<IconTableImport size={16} />} {...props}>
-                  Import CSV
+                  Import
                 </Button>
               )}
             </FileButton>
@@ -160,39 +205,42 @@ export default function App() {
             />
           </Group>
 
-          <Table>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Item Name</Table.Th>
-                <Table.Th w={128}>SKU</Table.Th>
-                <Table.Th w={128}>Price</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
+          <ScrollArea h="calc(100vh - 92px)" offsetScrollbars>
+            <Table stickyHeader>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Item Name</Table.Th>
+                  <Table.Th w={128}>SKU</Table.Th>
+                  <Table.Th w={128}>Price</Table.Th>
+                  <Table.Th></Table.Th>
+                </Table.Tr>
+              </Table.Thead>
 
-            <Table.Tbody>
-              {squareItems.map((item) => (
-                <SquareItemRow
-                  key={item.Token}
-                  item={item}
-                  addItem={() => {
-                    setPrintItems((draft) => {
-                      const draftItem = draft.find(
-                        (di) => di.Token === item.Token
-                      );
+              <Table.Tbody>
+                {squareItems.map((item) => (
+                  <SquareItemRow
+                    key={item.Token}
+                    item={item}
+                    addItem={() => {
+                      setPrintItems((draft) => {
+                        const draftItem = draft.find(
+                          (di) => di.Token === item.Token
+                        );
 
-                      if (draftItem) {
-                        draftItem.count = Number(draftItem.count) + 1;
-                      } else {
-                        draft.push({ ...item, count: 1 });
-                      }
-                    });
-                  }}
-                  onAddButtonEscape={handleAddButtonEscape}
-                  search={lowercaseSearch}
-                />
-              ))}
-            </Table.Tbody>
-          </Table>
+                        if (draftItem) {
+                          draftItem.count = Number(draftItem.count) + 1;
+                        } else {
+                          draft.push({ ...item, count: 1 });
+                        }
+                      });
+                    }}
+                    onAddButtonEscape={handleAddButtonEscape}
+                    search={lowercaseSearch}
+                  />
+                ))}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
         </Stack>
 
         <Stack flex={1}>
@@ -203,7 +251,7 @@ export default function App() {
               variant="light"
               onClick={() => setPrintItems([])}
             >
-              Clear Print Queue
+              Clear
             </Button>
 
             <Button
@@ -214,27 +262,29 @@ export default function App() {
             </Button>
           </Group>
 
-          <Table>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Item Name</Table.Th>
-                <Table.Th w={128}>SKU</Table.Th>
-                <Table.Th w={128}>Price</Table.Th>
-                <Table.Th w={128}>Count</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
+          <ScrollArea h="calc(100vh - 92px)" offsetScrollbars>
+            <Table>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Item Name</Table.Th>
+                  <Table.Th w={128}>SKU</Table.Th>
+                  <Table.Th w={128}>Price</Table.Th>
+                  <Table.Th w={128}>Count</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
 
-            <Table.Tbody>
-              {printItems.map((item) => (
-                <PrintItemRow
-                  key={item.Token}
-                  item={item}
-                  updateItem={updatePrintItem}
-                  removeItem={removePrintItem}
-                />
-              ))}
-            </Table.Tbody>
-          </Table>
+              <Table.Tbody>
+                {printItems.map((item) => (
+                  <PrintItemRow
+                    key={item.Token}
+                    item={item}
+                    updateItem={updatePrintItem}
+                    removeItem={removePrintItem}
+                  />
+                ))}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
         </Stack>
       </Group>
     </MantineProvider>
