@@ -9,6 +9,7 @@ import {
   createTheme,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
+import { useHotkeys } from "@mantine/hooks";
 import {
   IconClearAll,
   IconPrinter,
@@ -54,6 +55,8 @@ export default function App() {
     if (!storedItemString) return [];
     return JSON.parse(storedItemString);
   });
+
+  useHotkeys([["mod+P", () => createPDF(printItems)]]);
 
   const updatePrintItem = useCallback(
     <T extends keyof PrintItem>(
