@@ -94,23 +94,26 @@ export async function createLabel(
     logoHeight
   );
 
-  // render barcode
-  JsBarcode("#barcode", printItem["SKU"], { displayValue: false });
-  await sleepOneFrame();
-  const barcode = document.getElementById("barcode") as HTMLImageElement;
-
-  // calculate barcode size
-  const barcodeRatio = barcode.width / barcode.height;
-  const barcodeHeight = logoHeight + 0.02;
-  const barcodeWidth = barcodeHeight * barcodeRatio;
-  const barcodeX = x + LABEL_WIDTH - 2 * LABEL_PADDING - barcodeWidth;
+  let barcodeX = x + LABEL_WIDTH - LABEL_PADDING;
 
   // add barcode
-  doc.addImage(barcode.src, barcodeX, y, barcodeWidth, barcodeHeight);
+  if (printItem["SKU"]) {
+    JsBarcode("#barcode", printItem["SKU"], { displayValue: false });
+    await sleepOneFrame();
+    const barcode = document.getElementById("barcode") as HTMLImageElement;
+    const barcodeRatio = barcode.width / barcode.height;
+    const barcodeHeight = logoHeight + 0.02;
+    const barcodeWidth = barcodeHeight * barcodeRatio;
+    barcodeX -= barcodeWidth + LABEL_PADDING;
+    doc.addImage(barcode.src, barcodeX, y, barcodeWidth, barcodeHeight);
+  }
 
-  doc.text("$" + printItem["Price"], barcodeX - LABEL_PADDING, y + 0.21, {
-    align: "right",
-  });
+  // add price
+  if (printItem["Price"]) {
+    doc.text("$" + printItem["Price"], barcodeX - LABEL_PADDING, y + 0.21, {
+      align: "right",
+    });
+  }
 
   doc.text(
     asciiOnly(printItem["Item Name"]),
