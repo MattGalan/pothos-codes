@@ -39,7 +39,10 @@ export async function createPDF(printItems: PrintItem[]) {
 export function createTestPDF() {
   const doc = new jsPDF({ format: "letter", unit: "in" });
   doc.setLineWidth(0.01);
-  doc.setDrawColor(200);
+  doc.setDrawColor(220);
+  doc.setTextColor(220);
+  doc.setFontSize(8);
+  doc.text("TOP", 4.25, 0.75);
 
   const {
     pagePaddingLeft,
@@ -51,14 +54,13 @@ export function createTestPDF() {
 
   for (let x = 0; x < LABEL_COLUMNS; x++) {
     for (let y = 0; y < LABEL_ROWS; y++) {
-      const xPos = pagePaddingLeft + x * (labelWidth + columnGap);
-      const yPos = pagePaddingTop + y * labelHeight;
-      const radius = 1 / 16;
-
-      doc.circle(xPos, yPos, radius);
-      doc.circle(xPos + labelWidth, yPos, radius);
-      doc.circle(xPos, yPos + labelHeight, radius);
-      doc.circle(xPos + labelWidth, yPos + labelHeight, radius);
+      doc.rect(
+        pagePaddingLeft + x * (labelWidth + columnGap),
+        pagePaddingTop + y * labelHeight,
+        labelWidth,
+        labelHeight,
+        "S"
+      );
     }
   }
 
