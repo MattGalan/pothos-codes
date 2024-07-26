@@ -18,6 +18,7 @@ import {
   IconPrinter,
   IconSearch,
   IconTableImport,
+  IconTableRow,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
@@ -260,10 +261,23 @@ export default function App() {
         </Stack>
 
         <Stack flex={1}>
-          <Group justify="end">
+          <Group justify="end" gap="xs">
             <PageCount count={pageCount} />
+
+            <PrintConfig />
+
             <Button.Group>
-              <PrintConfig />
+              <Button
+                leftSection={<IconTableRow size={16} />}
+                onClick={() => {
+                  const offset = Number(prompt("How many labels to skip?"));
+                  if (!offset || isNaN(offset)) return;
+                  createPDF(printItems, offset);
+                }}
+                variant="light"
+              >
+                Offset Print
+              </Button>
 
               <Button
                 leftSection={<IconPrinter size={16} />}

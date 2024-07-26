@@ -16,11 +16,11 @@ export const LOGO_HEIGHT = 147;
 export const LOGO_SCALE = 0.0017;
 const BARCODE_WIDTH = 1.25;
 
-export async function createPDF(printItems: PrintItem[]) {
+export async function createPDF(printItems: PrintItem[], offset = 0) {
   const doc = new jsPDF({ format: "letter", unit: "in" });
   doc.setFontSize(12);
 
-  let pageIndex = 0;
+  let pageIndex = offset;
 
   for (const printItem of printItems) {
     for (let i = 0; i < Number(printItem.count); i++) {

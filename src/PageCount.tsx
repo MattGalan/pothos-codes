@@ -11,7 +11,7 @@ export function PageCount({ count }: { count: number }) {
       : LABELS_PER_PAGE - (count % LABELS_PER_PAGE);
 
   return (
-    <Group flex={1} gap={8} wrap="nowrap" justify="flex-end">
+    <Group flex={1} gap={8} wrap="nowrap" justify="flex-end" pr="xs">
       <Text size="sm">
         {count} label{count === 1 ? "" : "s"}
       </Text>

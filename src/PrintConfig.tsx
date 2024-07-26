@@ -1,4 +1,12 @@
-import { Button, Group, Modal, NumberInput, Stack, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Group,
+  Modal,
+  NumberInput,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { useDisclosure, useLocalStorage } from "@mantine/hooks";
 import {
   IconArrowBackUp,
@@ -41,13 +49,9 @@ export function PrintConfig() {
 
   return (
     <>
-      <Button
-        leftSection={<IconSettings size={16} />}
-        variant="light"
-        onClick={open}
-      >
-        Config
-      </Button>
+      <ActionIcon variant="light" onClick={open} size="lg">
+        <IconSettings size={16} />
+      </ActionIcon>
 
       <Modal opened={opened} onClose={close} title="Print Config">
         <Stack>
