@@ -219,6 +219,7 @@ export default function App() {
                 if (key.code === "Escape") setSearch("");
               }}
               w={256}
+              mr="sm"
             />
           </Group>
 
@@ -300,6 +301,7 @@ export default function App() {
                     <ActionIcon
                       variant="light"
                       onClick={() => setPrintItems([])}
+                      mt="-sm"
                     >
                       <IconTrash size={16} />
                     </ActionIcon>
