@@ -1,23 +1,24 @@
 import {
+  ActionIcon,
   Button,
+  createTheme,
   FileButton,
   Group,
   Image,
   MantineProvider,
+  ScrollArea,
   Stack,
   Table,
-  TextInput,
   Text,
-  createTheme,
-  ScrollArea,
+  TextInput,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { useHotkeys, useLocalStorage } from "@mantine/hooks";
 import {
-  IconClearAll,
   IconPrinter,
   IconSearch,
   IconTableImport,
+  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import Papa from "papaparse";
@@ -26,9 +27,9 @@ import { useImmer } from "use-immer";
 import "./App.css";
 import { PageCount } from "./PageCount";
 import { createPDF } from "./PDF";
+import { PrintConfig } from "./PrintConfig";
 import { PrintItemRow } from "./PrintItemRow";
 import { SquareItemRow } from "./SquareItemRow";
-import { PrintConfig } from "./PrintConfig";
 
 const theme = createTheme({
   primaryColor: "green",
@@ -262,14 +263,6 @@ export default function App() {
           <Group justify="end">
             <PageCount count={pageCount} />
             <Button.Group>
-              <Button
-                leftSection={<IconClearAll size={16} />}
-                variant="light"
-                onClick={() => setPrintItems([])}
-              >
-                Clear
-              </Button>
-
               <PrintConfig />
 
               <Button
@@ -289,6 +282,14 @@ export default function App() {
                   <Table.Th w={128}>SKU</Table.Th>
                   <Table.Th w={128}>Price</Table.Th>
                   <Table.Th w={128}>Count</Table.Th>
+                  <Table.Th w={48}>
+                    <ActionIcon
+                      variant="light"
+                      onClick={() => setPrintItems([])}
+                    >
+                      <IconTrash size={16} />
+                    </ActionIcon>
+                  </Table.Th>
                 </Table.Tr>
               </Table.Thead>
 
