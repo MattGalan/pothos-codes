@@ -10,10 +10,11 @@ export const LABEL_COLUMNS = 3;
 export const LABELS_PER_PAGE = LABEL_ROWS * LABEL_COLUMNS;
 
 // these are stylistic choices
-export const LABEL_PADDING = 0.13;
+export const LABEL_PADDING = 0.125;
 export const LOGO_WIDTH = 442;
 export const LOGO_HEIGHT = 147;
 export const LOGO_SCALE = 0.0017;
+const BARCODE_WIDTH = 1.25;
 
 export async function createPDF(printItems: PrintItem[]) {
   const doc = new jsPDF({ format: "letter", unit: "in" });
@@ -82,12 +83,10 @@ export async function createLabel(
 
   const maxWidth = labelWidth - 2 * LABEL_PADDING;
 
-  // not in the mood to get emojis working
-  const strippedItemName = asciiOnly(printItem["Item Name"]);
+  const text = asciiOnly(`$${printItem["Price"]} - ${printItem["Item Name"]}`);
 
   // used later for vertical centering one-liners
-  const isMultiLine =
-    doc.splitTextToSize(strippedItemName, maxWidth).length > 1;
+  const isMultiLine = doc.splitTextToSize(text, maxWidth).length > 1;
 
   const xIndex = index % LABEL_COLUMNS;
   const yIndex = Math.floor(index / LABEL_COLUMNS);
@@ -123,33 +122,22 @@ export async function createLabel(
     logoHeight
   );
 
-  let barcodeX = x + labelWidth - LABEL_PADDING;
-
   // add barcode
   if (printItem["SKU"]) {
     JsBarcode("#barcode", printItem["SKU"], { displayValue: false });
     await sleepOneFrame();
     const barcode = document.getElementById("barcode") as HTMLImageElement;
-    const barcodeRatio = barcode.width / barcode.height;
-    const barcodeHeight = logoHeight + 0.02;
-    const barcodeWidth = barcodeHeight * barcodeRatio;
-    barcodeX -= barcodeWidth + LABEL_PADDING;
-    doc.addImage(barcode.src, barcodeX, y, barcodeWidth, barcodeHeight);
+    doc.addImage(
+      barcode.src,
+      x + labelWidth - 2 * LABEL_PADDING - BARCODE_WIDTH,
+      y,
+      BARCODE_WIDTH,
+      logoHeight + 0.03
+    );
   }
 
-  // add price
-  if (printItem["Price"]) {
-    doc.text("$" + printItem["Price"], barcodeX - LABEL_PADDING, y + 0.21, {
-      align: "right",
-    });
-  }
-
-  doc.text(
-    asciiOnly(printItem["Item Name"]),
-    x,
-    y + LOGO_HEIGHT * LOGO_SCALE + 0.28,
-    { maxWidth }
-  );
+  // add text
+  doc.text(text, x, y + LOGO_HEIGHT * LOGO_SCALE + 0.28, { maxWidth });
 }
 
 function sleepOneFrame() {
