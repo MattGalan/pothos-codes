@@ -33,10 +33,36 @@ export async function createPDF(printItems: PrintItem[]) {
     }
   }
 
-  // open the print dialog
-  const data = doc.output("blob");
-  const blobUrl = URL.createObjectURL(data);
-  printJS(blobUrl);
+  printDoc(doc);
+}
+
+export function createTestPDF() {
+  const doc = new jsPDF({ format: "letter", unit: "in" });
+  doc.setLineWidth(0.01);
+  doc.setDrawColor(200);
+
+  const {
+    pagePaddingLeft,
+    pagePaddingTop,
+    labelWidth,
+    labelHeight,
+    columnGap,
+  } = getPrintConfig();
+
+  for (let x = 0; x < LABEL_COLUMNS; x++) {
+    for (let y = 0; y < LABEL_ROWS; y++) {
+      const xPos = pagePaddingLeft + x * (labelWidth + columnGap);
+      const yPos = pagePaddingTop + y * labelHeight;
+      const radius = 1 / 16;
+
+      doc.circle(xPos, yPos, radius);
+      doc.circle(xPos + labelWidth, yPos, radius);
+      doc.circle(xPos, yPos + labelHeight, radius);
+      doc.circle(xPos + labelWidth, yPos + labelHeight, radius);
+    }
+  }
+
+  printDoc(doc);
 }
 
 export async function createLabel(
@@ -130,4 +156,10 @@ function sleepOneFrame() {
 
 function asciiOnly(str: string) {
   return str.replace(/[^\x00-\x7F]/g, "");
+}
+
+function printDoc(doc: jsPDF) {
+  const data = doc.output("blob");
+  const blobUrl = URL.createObjectURL(data);
+  printJS(blobUrl);
 }

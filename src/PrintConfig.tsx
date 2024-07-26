@@ -5,6 +5,7 @@ import {
   IconSettings,
   IconTestPipe,
 } from "@tabler/icons-react";
+import { createTestPDF } from "./PDF";
 
 const DEFAULT_PRINT_CONFIG = {
   labelWidth: 2.625,
@@ -34,7 +35,7 @@ export function PrintConfig() {
     (property: keyof PrintConfig) => (value: string | number) => {
       setPrintConfig((prevConfig) => ({
         ...prevConfig,
-        [property]: Number(value),
+        [property]: value,
       }));
     };
 
@@ -107,7 +108,8 @@ export function PrintConfig() {
             >
               Reset
             </Button>
-            <Button leftSection={<IconTestPipe />} onClick={() => {}}>
+
+            <Button leftSection={<IconTestPipe />} onClick={createTestPDF}>
               Test Print
             </Button>
           </Group>
