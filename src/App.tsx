@@ -12,7 +12,7 @@ import {
   ScrollArea,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
-import { useHotkeys } from "@mantine/hooks";
+import { useHotkeys, useLocalStorage } from "@mantine/hooks";
 import {
   IconClearAll,
   IconPrinter,
@@ -77,6 +77,10 @@ export interface PrintItem extends SquareItem {
 export default function App() {
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+
+  const [importDate, setImportDate] = useLocalStorage({
+    key: "importDate",
+  });
 
   const [squareItems, setSquareItems] = useState<SquareItem[]>(() => {
     const storedItemString = window.localStorage.getItem("squareItems");
@@ -154,6 +158,14 @@ export default function App() {
               ml="7"
             />
 
+            {importDate && (
+              <Text size="xs" c="dimmed" ta="right">
+                Last imported
+                <br />
+                2/10/2022
+              </Text>
+            )}
+
             <FileButton
               onChange={(file) => {
                 if (!file) return;
@@ -172,6 +184,8 @@ export default function App() {
                     );
 
                     setSquareItems(importedItems);
+
+                    setImportDate(new Date().toLocaleDateString());
                   },
                 });
               }}
