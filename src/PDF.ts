@@ -2,13 +2,9 @@ import jsPDF from "jspdf";
 import printJS from "print-js";
 import { PrintItem } from "./App";
 import JsBarcode from "jsbarcode";
+import { getPrintConfig } from "./PrintConfig";
 
 // these are set by the paper we're using
-export const PAGE_PADDING_TOP = 0.5;
-export const PAGE_PADDING_LEFT = 0.1875;
-export const LABEL_HEIGHT = 1;
-export const LABEL_WIDTH = 2.625;
-export const LABEL_HORIZONTAL_GAP = 0.125;
 export const LABEL_ROWS = 10;
 export const LABEL_COLUMNS = 3;
 export const LABELS_PER_PAGE = LABEL_ROWS * LABEL_COLUMNS;
@@ -48,7 +44,15 @@ export async function createLabel(
   printItem: PrintItem,
   index: number
 ) {
-  const maxWidth = LABEL_WIDTH - 2 * LABEL_PADDING;
+  const {
+    pagePaddingLeft,
+    pagePaddingTop,
+    labelWidth,
+    labelHeight,
+    columnGap,
+  } = getPrintConfig();
+
+  const maxWidth = labelWidth - 2 * LABEL_PADDING;
 
   // not in the mood to get emojis working
   const strippedItemName = asciiOnly(printItem["Item Name"]);
@@ -60,29 +64,26 @@ export async function createLabel(
   const xIndex = index % LABEL_COLUMNS;
   const yIndex = Math.floor(index / LABEL_COLUMNS);
 
-  const x =
-    PAGE_PADDING_LEFT +
-    LABEL_PADDING +
-    xIndex * (LABEL_WIDTH + LABEL_HORIZONTAL_GAP);
+  const x = pagePaddingLeft + LABEL_PADDING + xIndex * (labelWidth + columnGap);
 
   const y =
-    PAGE_PADDING_TOP +
+    pagePaddingTop +
     LABEL_PADDING +
-    yIndex * LABEL_HEIGHT +
+    yIndex * labelHeight +
     (isMultiLine ? 0 : 0.1);
 
   const logoHeight = LOGO_HEIGHT * LOGO_SCALE;
 
   // debug rectangle
-  doc.setDrawColor(200);
-  doc.setLineWidth(0.01);
-  doc.rect(
-    PAGE_PADDING_LEFT + xIndex * (LABEL_WIDTH + LABEL_HORIZONTAL_GAP),
-    PAGE_PADDING_TOP + yIndex * LABEL_HEIGHT,
-    LABEL_WIDTH,
-    LABEL_HEIGHT,
-    "S"
-  );
+  // doc.setDrawColor(200);
+  // doc.setLineWidth(0.01);
+  // doc.rect(
+  //   pagePaddingLeft + xIndex * (labelWidth + columnGap),
+  //   pagePaddingTop + yIndex * labelHeight,
+  //   labelWidth,
+  //   labelHeight,
+  //   "S"
+  // );
 
   // add logo
   doc.addImage(
@@ -94,7 +95,7 @@ export async function createLabel(
     logoHeight
   );
 
-  let barcodeX = x + LABEL_WIDTH - LABEL_PADDING;
+  let barcodeX = x + labelWidth - LABEL_PADDING;
 
   // add barcode
   if (printItem["SKU"]) {

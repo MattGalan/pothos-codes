@@ -28,6 +28,7 @@ import { PageCount } from "./PageCount";
 import { createPDF } from "./PDF";
 import { PrintItemRow } from "./PrintItemRow";
 import { SquareItemRow } from "./SquareItemRow";
+import { PrintConfig } from "./PrintConfig";
 
 const theme = createTheme({
   primaryColor: "green",
@@ -246,20 +247,24 @@ export default function App() {
         <Stack flex={1}>
           <Group justify="end">
             <PageCount count={pageCount} />
-            <Button
-              leftSection={<IconClearAll size={16} />}
-              variant="light"
-              onClick={() => setPrintItems([])}
-            >
-              Clear
-            </Button>
+            <Button.Group>
+              <Button
+                leftSection={<IconClearAll size={16} />}
+                variant="light"
+                onClick={() => setPrintItems([])}
+              >
+                Clear
+              </Button>
 
-            <Button
-              leftSection={<IconPrinter size={16} />}
-              onClick={() => createPDF(printItems)}
-            >
-              Print
-            </Button>
+              <PrintConfig />
+
+              <Button
+                leftSection={<IconPrinter size={16} />}
+                onClick={() => createPDF(printItems)}
+              >
+                Print
+              </Button>
+            </Button.Group>
           </Group>
 
           <ScrollArea h="calc(100vh - 92px)" offsetScrollbars>
